@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mfumo wa Kuingiza Matokeo Mtandaoni - O Level (Inasaidia Offline)</title>
+    <title>Mfumo wa Kuingiza Matokeo Mtandaoni - A Level</title>
     <!-- Tailwind CSS v3 Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Library ya Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen">
+<body class="bg-slate-100 font-sans min-h-screen">
 
     <div class="container mx-auto p-4 max-w-6xl">
-        <header class="bg-blue-800 text-white p-6 rounded-lg shadow-md mb-6 text-center relative">
-            <!-- Kiashiria cha Mtandao (Offline/Online Indicator) -->
+        <header class="bg-indigo-900 text-white p-6 rounded-lg shadow-md mb-6 text-center relative">
+            <!-- Kiashiria cha Mtandao -->
             <div id="network-status" class="absolute top-3 left-4 text-xs font-bold bg-white text-gray-800 px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5">
                 <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-green-600 inline-block animate-pulse"></span>
                 <span id="status-text">Online</span>
             </div>
 
-            <h1 class="text-2xl md:text-3xl font-bold tracking-wide mt-2 md:mt-0">MFUMO WA MATOKEO (O-LEVEL)</h1>
-            <p class="text-xs md:text-sm mt-2 text-blue-200">Uwezo wa Kufanya Kazi Bila Mtandao (Offline) Umewezeshwa - Alama Hazipotei Kivinjari Kikifungwa</p>
+            <h1 class="text-2xl md:text-3xl font-bold tracking-wide mt-2 md:mt-0">MFUMO WA MATOKEO (A-LEVEL)</h1>
+            <p class="text-xs md:text-sm mt-2 text-indigo-200">Uwezo wa Kufanya Kazi Offline Umewezeshwa | Madaraja ya NECTA A-Level</p>
             <button id="logout-btn" onclick="logout()" class="absolute top-6 right-6 bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded hidden transition">Toka (Log Out)</button>
         </header>
 
@@ -35,56 +35,53 @@
         <!-- AUTH & REGISTRATION SECTION -->
         <section id="auth-section" class="bg-white p-6 rounded-lg shadow-md mb-6">
             <div class="flex border-b mb-4">
-                <button id="tab-login" onclick="switchAuthTab('login')" class="py-2 px-4 font-bold border-b-2 border-blue-600 text-blue-600 focus:outline-none">Ingia Mfomoni (Log In)</button>
-                <button id="tab-register" onclick="switchAuthTab('register')" class="py-2 px-4 font-medium text-gray-500 hover:text-blue-600 focus:outline-none">Jisajili Mwalimu Mpya</button>
+                <button id="tab-login" onclick="switchAuthTab('login')" class="py-2 px-4 font-bold border-b-2 border-indigo-600 text-indigo-600 focus:outline-none">Ingia Mfomoni (Log In)</button>
+                <button id="tab-register" onclick="switchAuthTab('register')" class="py-2 px-4 font-medium text-gray-500 hover:text-indigo-600 focus:outline-none">Jisajili Mwalimu Mpya</button>
             </div>
 
-            <!-- FORM YA KUINGIA (LOG IN) -->
+            <!-- FORM YA KUINGIA -->
             <div id="login-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div>
                     <label class="block text-sm font-medium text-gray-600">Jina la Mwalimu au Admin</label>
-                    <input type="text" id="login-name" placeholder="Mf. MWL. JUMA" class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="login-name" placeholder="Mf. MWL. JUMA" class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600">Aina ya Akaunti</label>
-                    <select id="login-role" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <select id="login-role" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                         <option value="user">Mwalimu wa Somo</option>
                         <option value="admin">Admin (Mkuu wa Taaluma)</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600">Neno la Siri (Password)</label>
-                    <input type="password" id="login-password" placeholder="••••••••" class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="password" id="login-password" placeholder="••••••••" class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
                 <div>
-                    <button onclick="login()" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 font-semibold transition shadow-sm cursor-pointer">Ingia Kwenye Mfumo</button>
+                    <button onclick="login()" class="w-full bg-indigo-600 text-white p-2 rounded-md hover:bg-indigo-700 font-semibold transition shadow-sm cursor-pointer">Ingia Kwenye Mfumo</button>
                 </div>
             </div>
 
-            <!-- FORM YA KUJISAJILI (REGISTER) -->
+            <!-- FORM YA KUJISAJILI -->
             <div id="register-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end hidden">
                 <div>
                     <label class="block text-sm font-medium text-gray-600">Jina Lako Kamili (Herufi Kubwa)</label>
-                    <input type="text" id="reg-name" placeholder="Mf. MWL. ANNA JUMA" class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" id="reg-name" placeholder="Mf. MWL. ANNA JUMA" class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600">Somo Unalofundisha</label>
-                    <select id="reg-subject" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="KISW">KISWAHILI (KISW)</option>
-                        <option value="ENG">ENGLISH (ENG)</option>
-                        <option value="MATHS">BASIC MATHEMATICS (MATHS)</option>
-                        <option value="HIST">HISTORY (HIST)</option>
-                        <option value="GEO">GEOGRAPHY (GEO)</option>
-                        <option value="CHEM">CHEMISTRY (CHEM)</option>
-                        <option value="PHYS">PHYSICS (PHYS)</option>
-                        <option value="BIOS">BIOLOGY (BIOS)</option>
+                    <select id="reg-subject" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="ACOM">ACADEMIC COMMUNICATION (ACOM)</option>
                         <option value="HTM">HISTORIA YA TANZANIA NA MAADILI (HTM)</option>
-                        <option value="BS">BUSINESS STUDIES (BS)</option>
+                        <option value="GEO">GEOGRAPHY (GEO)</option>
+                        <option value="HIST">HISTORY (HIST)</option>
+                        <option value="KISW">KISWAHILI (KISW)</option>
+                        <option value="FAS">FASIHI YA KISWAHILI (FAS)</option>
+                        <option value="LIT">LITERATURE IN ENGLISH (LIT)</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600">Tengeneza Password Yako</label>
-                    <input type="password" id="reg-password" placeholder="Weka password yako hapa" class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="password" id="reg-password" placeholder="Weka password" class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                 </div>
                 <div>
                     <button onclick="registerTeacher()" class="w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 font-semibold transition shadow-sm cursor-pointer">Kamilisha Usajili</button>
@@ -96,14 +93,14 @@
 
         <!-- ADMIN SECTION -->
         <section id="admin-section" class="bg-white p-6 rounded-lg shadow-md mb-6 hidden border-2 border-red-200">
-            <h2 class="text-xl font-bold mb-4 text-red-600 border-b pb-2">Sehemu ya Admin (Usimamizi wa Majina kwa Darasa)</h2>
+            <h2 class="text-xl font-bold mb-4 text-red-600 border-b pb-2">Sehemu ya Admin (Usimamizi wa Majina ya Wanafunzi)</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col justify-between">
                     <div>
                         <h3 class="font-semibold text-gray-700 mb-1 text-sm">Hatua ya 1: Pakua Fomati ya Excel</h3>
                         <p class="text-xs text-gray-500 mb-3">Pakua faili la mfano kisha ujaze majina ya wanafunzi kabla ya kuyapandisha.</p>
                     </div>
-                    <button onclick="downloadTemplate()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-semibold text-xs transition flex items-center justify-center gap-1 cursor-pointer">
+                    <button onclick="downloadTemplate()" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 font-semibold text-xs transition flex items-center justify-center gap-1 cursor-pointer">
                         ⬇️ Pakua Excel Template
                     </button>
                 </div>
@@ -120,7 +117,7 @@
                 <div class="bg-red-50 p-4 rounded-lg border border-red-200 flex flex-col justify-between">
                     <div>
                         <h3 class="font-semibold text-red-700 mb-1 text-sm">Hatua ya 3: Safisha / Futa Darasa</h3>
-                        <p class="text-xs text-gray-600 mb-3">Ukibonyeza hapa, utafuta kabisa orodha yote ya wanafunzi na alama zao kwenye darasa lililochaguliwa kwa sasa.</p>
+                        <p class="text-xs text-gray-600 mb-3">Utafuta kabisa orodha yote ya wanafunzi na alama zao kwenye darasa lililochaguliwa kwa sasa.</p>
                     </div>
                     <button onclick="clearCurrentClassData()" class="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 font-semibold text-xs transition cursor-pointer">
                         🗑️ Futa Majina ya Darasa Hili
@@ -133,10 +130,10 @@
         <section id="filters-section" class="bg-white p-6 rounded-lg shadow-md mb-6 hidden opacity-50 pointer-events-none transition-all duration-300">
             <h2 class="text-xl font-bold mb-4 text-gray-700 border-b pb-2">Vigezo vya Mtihani na Vichujio</h2>
             
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 bg-blue-50 p-4 rounded-lg border border-blue-100">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 bg-indigo-50 p-4 rounded-lg border border-indigo-100">
                 <div>
-                    <label class="block text-xs font-bold text-blue-800 uppercase">Aina ya Mtihani</label>
-                    <select id="select-exam-type" class="w-full mt-1 p-2 border border-blue-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500" onchange="renderTable()">
+                    <label class="block text-xs font-bold text-indigo-800 uppercase">Aina ya Mtihani</label>
+                    <select id="select-exam-type" class="w-full mt-1 p-2 border border-indigo-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-indigo-500" onchange="renderTable()">
                         <option value="MONTHLY TEST">MONTHLY TEST</option>
                         <option value="MID-TERM">MID-TERM</option>
                         <option value="TERMINAL">TERMINAL</option>
@@ -144,15 +141,15 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-blue-800 uppercase">Muhula (Term)</label>
-                    <select id="select-term" class="w-full mt-1 p-2 border border-blue-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500" onchange="renderTable()">
+                    <label class="block text-xs font-bold text-indigo-800 uppercase">Muhula (Term)</label>
+                    <select id="select-term" class="w-full mt-1 p-2 border border-indigo-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-indigo-500" onchange="renderTable()">
                         <option value="TERM 1">TERM 1</option>
                         <option value="TERM 2">TERM 2</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-blue-800 uppercase">Mwezi</label>
-                    <select id="select-month" class="w-full mt-1 p-2 border border-blue-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500" onchange="renderTable()">
+                    <label class="block text-xs font-bold text-indigo-800 uppercase">Mwezi</label>
+                    <select id="select-month" class="w-full mt-1 p-2 border border-indigo-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-indigo-500" onchange="renderTable()">
                         <option value="JANUARI">JANUARI</option>
                         <option value="FEBRUARI">FEBRUARI</option>
                         <option value="MARCHI">MARCHI</option>
@@ -168,8 +165,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-blue-800 uppercase">Mwaka</label>
-                    <select id="select-year" class="w-full mt-1 p-2 border border-blue-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500" onchange="renderTable()">
+                    <label class="block text-xs font-bold text-indigo-800 uppercase">Mwaka</label>
+                    <select id="select-year" class="w-full mt-1 p-2 border border-indigo-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-indigo-500" onchange="renderTable()">
                         <option value="2026">2026</option>
                         <option value="2027">2027</option>
                         <option value="2028">2028</option>
@@ -182,31 +179,26 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-600">Chagua Darasa</label>
-                    <select id="select-class" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="renderTable()">
-                        <option value="Form 1">Form 1</option>
-                        <option value="Form 2">Form 2</option>
-                        <option value="Form 3">Form 3</option>
-                        <option value="Form 4">Form 4</option>
+                    <select id="select-class" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none" onchange="renderTable()">
+                        <option value="Form 5">Form 5</option>
+                        <option value="Form 6">Form 6</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600">Somo (Chaguzi)</label>
-                    <select id="select-subject" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="renderTable()">
-                        <option value="KISW">KISWAHILI (KISW)</option>
-                        <option value="ENG">ENGLISH (ENG)</option>
-                        <option value="MATHS">BASIC MATHEMATICS (MATHS)</option>
-                        <option value="HIST">HISTORY (HIST)</option>
-                        <option value="GEO">GEOGRAPHY (GEO)</option>
-                        <option value="CHEM">CHEMISTRY (CHEM)</option>
-                        <option value="PHYS">PHYSICS (PHYS)</option>
-                        <option value="BIOS">BIOLOGY (BIOS)</option>
+                    <select id="select-subject" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none" onchange="renderTable()">
+                        <option value="ACOM">ACADEMIC COMMUNICATION (ACOM)</option>
                         <option value="HTM">HISTORIA YA TANZANIA NA MAADILI (HTM)</option>
-                        <option value="BS">BUSINESS STUDIES (BS)</option>
+                        <option value="GEO">GEOGRAPHY (GEO)</option>
+                        <option value="HIST">HISTORY (HIST)</option>
+                        <option value="KISW">KISWAHILI (KISW)</option>
+                        <option value="FAS">FASIHI YA KISWAHILI (FAS)</option>
+                        <option value="LIT">LITERATURE IN ENGLISH (LIT)</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600">Chuja kwa Jinsia</label>
-                    <select id="select-gender" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="renderTable()">
+                    <select id="select-gender" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none" onchange="renderTable()">
                         <option value="All">Wote (Wanaume na Wanawake)</option>
                         <option value="M">Wanaume Pekee (M)</option>
                         <option value="F">Wanawake Pekee (F)</option>
@@ -220,12 +212,12 @@
             <div class="flex flex-col sm:flex-row justify-between items-center mb-4 border-b pb-2 gap-4">
                 <div class="w-full">
                     <h2 class="text-lg font-bold text-gray-700">Orodha ya Wanafunzi na Kujaza Alama</h2>
-                    <p class="text-xs text-blue-700 font-semibold" id="exam-summary-display"></p>
+                    <p class="text-xs text-indigo-700 font-semibold" id="exam-summary-display"></p>
                     <p id="local-save-status" class="text-[11px] text-green-600 font-medium mt-0.5 italic">✓ Alama zote zimehifadhiwa salama kwenye kifaa hiki.</p>
                 </div>
                 <div class="flex gap-2 w-full sm:w-auto">
                     <button onclick="saveToCloud()" class="flex-1 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 font-bold text-sm transition shadow-sm cursor-pointer whitespace-nowrap">💾 Tuma Alama Mtandaoni</button>
-                    <button id="download-btn" onclick="downloadExcel()" class="flex-1 bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-800 font-semibold text-sm transition hidden shadow-sm cursor-pointer whitespace-nowrap">Pakua Excel (Admin)</button>
+                    <button id="download-btn" onclick="downloadExcel()" class="flex-1 bg-indigo-700 text-white px-4 py-2 rounded-md hover:bg-indigo-800 font-semibold text-sm transition hidden shadow-sm cursor-pointer whitespace-nowrap">Pakua Excel (Admin)</button>
                 </div>
             </div>
 
@@ -251,12 +243,11 @@
         const ADMIN_PASSWORD = "Necta2026"; 
 
         let registeredTeachers = {};
-        let classesDatabase = { "Form 1": [], "Form 2": [], "Form 3": [], "Form 4": [] };
+        let classesDatabase = { "Form 5": [], "Form 6": [] };
         let currentRole = "guest";
         let teacherSubject = "";
         let isOnline = true;
 
-        // 1. ANGALIA HALI YA MTANDAO LIVE
         function updateNetworkStatus() {
             const dot = document.getElementById('status-dot');
             const text = document.getElementById('status-text');
@@ -274,37 +265,33 @@
         window.addEventListener('online', updateNetworkStatus);
         window.addEventListener('offline', updateNetworkStatus);
 
-        // 2. PAKUA DATA ZA MWANZO KUTOKA LOCALSTORAGE AU CLOUD
         async function loadInitialData() {
-            // Pakua data za walimu zilizopo locally kwanza
-            let localTeachers = localStorage.getItem('local_teachers');
+            let localTeachers = localStorage.getItem('local_teachers_alevel');
             if (localTeachers) registeredTeachers = JSON.parse(localTeachers);
 
-            // Pakua database ya wanafunzi iliyopo locally kwanza
-            let localSchoolDb = localStorage.getItem('local_school_database');
+            let localSchoolDb = localStorage.getItem('local_school_database_alevel');
             if (localSchoolDb) classesDatabase = JSON.parse(localSchoolDb);
 
             updateNetworkStatus();
 
             if (navigator.onLine) {
                 try {
-                    let resTeachers = await fetch(`${FIREBASE_URL}/teachers.json`);
+                    let resTeachers = await fetch(`${FIREBASE_URL}/teachers_alevel.json`);
                     let dataTeachers = await resTeachers.json();
                     if(dataTeachers) {
                         registeredTeachers = dataTeachers;
-                        localStorage.setItem('local_teachers', JSON.stringify(registeredTeachers));
+                        localStorage.setItem('local_teachers_alevel', JSON.stringify(registeredTeachers));
                     }
 
-                    let resStudents = await fetch(`${FIREBASE_URL}/school_database.json`);
+                    let resStudents = await fetch(`${FIREBASE_URL}/school_database_alevel.json`);
                     let dataStudents = await resStudents.json();
                     if(dataStudents) {
-                        // Kuzuia ku-overwrite kama kuna data za offline ambazo hazijasave
-                        if(!localStorage.getItem('has_unsynced_data')) {
+                        if(!localStorage.getItem('has_unsynced_data_alevel')) {
                             classesDatabase = dataStudents;
-                            localStorage.setItem('local_school_database', JSON.stringify(classesDatabase));
+                            localStorage.setItem('local_school_database_alevel', JSON.stringify(classesDatabase));
                         }
                     }
-                } catch (e) { console.log("Hali ya mtandao inasumbua. Kutumia data za kifaa (Offline mode)."); }
+                } catch (e) { console.log("Kutumia data zilizopo kwenye kifaa."); }
             }
             checkUnsyncedData();
         }
@@ -312,7 +299,7 @@
 
         function checkUnsyncedData() {
             const banner = document.getElementById('sync-banner');
-            if (localStorage.getItem('has_unsynced_data') === 'true') {
+            if (localStorage.getItem('has_unsynced_data_alevel') === 'true') {
                 banner.classList.remove('hidden');
             } else {
                 banner.classList.add('hidden');
@@ -329,17 +316,17 @@
             if (tab === 'login') {
                 loginForm.classList.remove('hidden');
                 registerForm.classList.add('hidden');
-                tabLogin.className = "py-2 px-4 font-bold border-b-2 border-blue-600 text-blue-600";
-                tabRegister.className = "py-2 px-4 font-medium text-gray-500 hover:text-blue-600";
+                tabLogin.className = "py-2 px-4 font-bold border-b-2 border-indigo-600 text-indigo-600";
+                tabRegister.className = "py-2 px-4 font-medium text-gray-500 hover:text-indigo-600";
             } else {
                 if(!isOnline) {
-                    alert("Huwezi kusajili mwalimu mpya ukiwa Offline! Tafadhali washa intaneti kwanza.");
+                    alert("Tafadhali washa intaneti ili kusajili mwalimu mpya!");
                     return;
                 }
                 loginForm.classList.add('hidden');
                 registerForm.classList.remove('hidden');
-                tabLogin.className = "py-2 px-4 font-medium text-gray-500 hover:text-blue-600";
-                tabRegister.className = "py-2 px-4 font-bold border-b-2 border-blue-600 text-blue-600";
+                tabLogin.className = "py-2 px-4 font-medium text-gray-500 hover:text-indigo-600";
+                tabRegister.className = "py-2 px-4 font-bold border-b-2 border-indigo-600 text-indigo-600";
             }
         }
 
@@ -348,17 +335,17 @@
             const name = document.getElementById('reg-name').value.trim().toUpperCase();
             const subject = document.getElementById('reg-subject').value;
             const password = document.getElementById('reg-password').value;
-            if (!name || !password) return alert("Jaza Jina na Password kikamilifu!");
+            if (!name || !password) return alert("Jaza taarifa zote kikamilifu!");
 
             registeredTeachers[name] = { subject: subject, password: password };
 
             try {
-                await fetch(`${FIREBASE_URL}/teachers.json`, {
+                await fetch(`${FIREBASE_URL}/teachers_alevel.json`, {
                     method: 'PUT',
                     body: JSON.stringify(registeredTeachers)
                 });
-                localStorage.setItem('local_teachers', JSON.stringify(registeredTeachers));
-                alert(`Usajili Umefanikiwa! Mwl. ${name} ingia sasa.`);
+                localStorage.setItem('local_teachers_alevel', JSON.stringify(registeredTeachers));
+                alert(`Mwalimu ${name} amesajiliwa kikamilifu!`);
                 document.getElementById('reg-name').value = "";
                 document.getElementById('reg-password').value = "";
                 switchAuthTab('login');
@@ -384,7 +371,7 @@
             } else {
                 const teacher = registeredTeachers[name];
                 if (!teacher || teacher.password !== passwordInput) {
-                    status.innerText = "⚠️ Jina la Mwalimu au Password sio sahihi (Ama kifaa hakina kumbukumbu ya mwalimu huyu ukiwa Offline)!";
+                    status.innerText = "⚠️ Jina la Mwalimu au Password sio sahihi!";
                     status.className = "mt-3 text-sm font-medium text-red-600 bg-red-50 p-2 rounded-md block";
                     return;
                 }
@@ -408,13 +395,16 @@
             renderTable();
         }
 
-        function calculateGrade(score) {
+        // MADARAJA YA NECTA - A LEVEL
+        function calculateGradeAlevel(score) {
             if (score === "" || score === undefined || isNaN(score)) return "-";
             score = parseFloat(score);
             if (score >= 75) return "A";
             if (score >= 65) return "B";
-            if (score >= 45) return "C";
-            if (score >= 30) return "D";
+            if (score >= 55) return "C";
+            if (score >= 45) return "D";
+            if (score >= 35) return "E";
+            if (score >= 25) return "S";
             return "F";
         }
 
@@ -452,7 +442,7 @@
             filteredStudents.forEach((student, index) => {
                 if(!student.marks) student.marks = {};
                 const currentMark = student.marks[examKey] !== undefined ? student.marks[examKey] : "";
-                const currentGrade = calculateGrade(currentMark);
+                const currentGrade = calculateGradeAlevel(currentMark);
 
                 const row = document.createElement('tr');
                 row.className = "hover:bg-gray-50 border-b border-gray-100";
@@ -465,9 +455,9 @@
                             data-id="${student.id}"
                             oninput="updateLiveGrade(this, '${student.id}', '${examKey}')" 
                             onkeydown="handleNavigation(event, ${index})"
-                            class="mark-input w-20 p-1 border border-gray-300 rounded text-center focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                            class="mark-input w-20 p-1 border border-gray-300 rounded text-center focus:ring-2 focus:ring-indigo-400 focus:outline-none">
                     </td>
-                    <td id="grade-${student.id}" class="px-4 py-3 text-sm font-bold ${currentGrade === 'F' ? 'text-red-600' : 'text-green-700'}">${currentGrade}</td>
+                    <td id="grade-${student.id}" class="px-4 py-3 text-sm font-bold ${['F','S'].includes(currentGrade) ? 'text-red-600' : 'text-green-700'}">${currentGrade}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -494,13 +484,13 @@
             }
 
             const gradeTd = document.getElementById(`grade-${studentId}`);
-            const grade = calculateGrade(val);
+            const grade = calculateGradeAlevel(val);
             gradeTd.innerText = grade;
-            gradeTd.className = `px-4 py-3 text-sm font-bold ${grade === 'F' ? 'text-red-600' : 'text-green-700'}`;
+            gradeTd.className = `px-4 py-3 text-sm font-bold ${['F','S'].includes(grade) ? 'text-red-600' : 'text-green-700'}`;
 
-            // IFADHI PAPO HAPO KWENYE LOCAL STORAGE (OFFLINE AUTO-SAVE)
-            localStorage.setItem('local_school_database', JSON.stringify(classesDatabase));
-            localStorage.setItem('has_unsynced_data', 'true');
+            // LOCAL AUTO-SAVE (OFFLINE FUNCTION)
+            localStorage.setItem('local_school_database_alevel', JSON.stringify(classesDatabase));
+            localStorage.setItem('has_unsynced_data_alevel', 'true');
             
             const localStatus = document.getElementById('local-save-status');
             localStatus.innerText = "✍️ Alama inahifadhiwa kwenye kifaa (Offline)...";
@@ -525,42 +515,40 @@
             }
         }
 
-        // 3. TUMA DATA MTANDAONI KUTOKA KWENYE MEMORY YA KIFAA
         async function saveToCloud() {
             if(!navigator.onLine) {
-                alert("❌ Huwezi kutuma alama mtandaoni kwa sasa kwa sababu huna INTANETI! Mfumo umezihifadhi salama kwenye simu yako. Mtandao ukirudi utabonyeza kifungo hiki.");
+                alert("❌ Huna INTANETI kwa sasa! Mfumo umezitunza kwenye kifaa chako.");
                 return;
             }
 
             try {
-                // Kuvuta data za mwisho zilizopo local na kuzituma Firebase
-                let currentLocalDb = localStorage.getItem('local_school_database');
+                let currentLocalDb = localStorage.getItem('local_school_database_alevel');
                 if (currentLocalDb) classesDatabase = JSON.parse(currentLocalDb);
 
-                await fetch(`${FIREBASE_URL}/school_database.json`, {
+                await fetch(`${FIREBASE_URL}/school_database_alevel.json`, {
                     method: 'PUT',
                     body: JSON.stringify(classesDatabase)
                 });
                 
-                localStorage.setItem('has_unsynced_data', 'false');
+                localStorage.setItem('has_unsynced_data_alevel', 'false');
                 checkUnsyncedData();
-                alert("✔️ Alama zote zilizojazwa (Offline & Online) zimetumwa na kuhifadhiwa kikamilifu kwenye Server!");
+                alert("✔️ Alama zote zilizojazwa zimesawazishwa (Synced) mtandaoni!");
             } catch (e) { 
-                alert("Hitilafu ya Mtandao! Imeshindwa kufika kwenye Server. Data bado ipo salama kwenye simu yako."); 
+                alert("Kuna tatizo la mtandao! Data bado ipo salama kwenye kifaa chako."); 
             }
         }
 
         function downloadTemplate() {
             const currentClass = document.getElementById('select-class').value;
-            const templateData = [{ "Namba": "S001", "Jina": "ANNA JUMA", "Jinsia": "F" }];
+            const templateData = [{ "Namba": "EG001", "Jina": "JOHN P. MASANJA", "Jinsia": "M" }];
             const worksheet = XLSX.utils.json_to_sheet(templateData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Fomati_Majina");
-            XLSX.writeFile(workbook, `Template_Majina_${currentClass}.xlsx`);
+            XLSX.writeFile(workbook, `Template_Alevel_${currentClass}.xlsx`);
         }
 
         async function uploadStudents() {
-            if(!isOnline) return alert("Kazi hii inahitaji mtandao ili kusawazisha darasa zima na Server.");
+            if(!isOnline) return alert("Kazi hii inahitaji mtandao ili kusawazisha na Server.");
             const currentClass = document.getElementById('select-class').value;
             const fileInput = document.getElementById('excel-file');
             if (!fileInput.files[0]) return alert("Chagua faili la Excel!");
@@ -580,31 +568,31 @@
                     }));
                     
                     try {
-                        await fetch(`${FIREBASE_URL}/school_database.json`, {
+                        await fetch(`${FIREBASE_URL}/school_database_alevel.json`, {
                             method: 'PUT',
                             body: JSON.stringify(classesDatabase)
                         });
-                        localStorage.setItem('local_school_database', JSON.stringify(classesDatabase));
-                        alert(`Majina mapya ya ${currentClass} yamehifadhiwa Cloud na kwenye Kifaa!`);
+                        localStorage.setItem('local_school_database_alevel', JSON.stringify(classesDatabase));
+                        alert(`Majina mapya ya ${currentClass} yamehifadhiwa mtandaoni!`);
                         fileInput.value = "";
                         renderTable();
-                    } catch(err) { alert("Imeshindwa kupandisha majina, angalia mtandao wako."); }
+                    } catch(err) { alert("Imeshindwa kupandisha majina, angalia mtandao."); }
                 }
             };
             reader.readAsArrayBuffer(fileInput.files[0]);
         }
 
         async function clearCurrentClassData() {
-            if(!isOnline) return alert("Huwezi kufuta darasa ukiwa Offline.");
+            if(!isOnline) return alert("Huwezi kufuta data ukiwa Offline.");
             const currentClass = document.getElementById('select-class').value;
-            if (confirm(`Futa kabisa wanafunzi wa ${currentClass} kwenye Server?`)) {
+            if (confirm(`Futa kabisa wanafunzi wa ${currentClass}?`)) {
                 classesDatabase[currentClass] = [];
                 try {
-                    await fetch(`${FIREBASE_URL}/school_database.json`, {
+                    await fetch(`${FIREBASE_URL}/school_database_alevel.json`, {
                         method: 'PUT',
                         body: JSON.stringify(classesDatabase)
                     });
-                    localStorage.setItem('local_school_database', JSON.stringify(classesDatabase));
+                    localStorage.setItem('local_school_database_alevel', JSON.stringify(classesDatabase));
                     renderTable();
                 } catch(e) { alert("Imeshindwa kufuta, mtandao unasumbua."); }
             }
@@ -620,7 +608,8 @@
             const month = document.getElementById('select-month').value;
             const year = document.getElementById('select-year').value;
 
-            const subjectsList = ["KISW", "ENG", "MATHS", "HIST", "GEO", "CHEM", "PHYS", "BIOS", "HTM", "BS"];
+            // Orodha rasmi ya masomo ya A-Level tuliyoyaweka
+            const subjectsList = ["ACOM", "HTM", "GEO", "HIST", "KISW", "FAS", "LIT"];
 
             const excelRows = currentStudents.map(student => {
                 let m = student.marks || {};
@@ -641,7 +630,7 @@
             const worksheet = XLSX.utils.json_to_sheet(excelRows);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Matokeo");
-            XLSX.writeFile(workbook, `Matokeo_${currentClass}_${examType}_${term}_${month}_${year}.xlsx`);
+            XLSX.writeFile(workbook, `Matokeo_ALevel_${currentClass}_${examType}_${term}_${month}_${year}.xlsx`);
         }
 
         function logout() { location.reload(); }
