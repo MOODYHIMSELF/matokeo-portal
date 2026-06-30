@@ -1,650 +1,846 @@
 <!DOCTYPE html>
-<html lang="sw">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mfumo wa Kuingiza Matokeo Mtandaoni - O Level (Inasaidia Offline)</title>
-    <!-- Tailwind CSS v3 Play CDN -->
+    <title>Mwanamwema Shein Secondary School - Portal</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk13YW5hbXdlbWEgU2hlaW4gUG9ydGFsIiwKICAic2hvcnRfbmFtZSI6ICJNd2FuYVNoZWluIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxZTNhOGEiLAogICJ0aGVtZV9jb2xvciI6IiMxZTNhOGEiCn0=">
+    <meta name="theme-color" content="#1e3a8a">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Library ya Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen">
+<body class="bg-gray-100 min-h-screen">
 
-    <div class="container mx-auto p-4 max-w-6xl">
-        <header class="bg-blue-800 text-white p-6 rounded-lg shadow-md mb-6 text-center relative">
-            <!-- Kiashiria cha Mtandao (Offline/Online Indicator) -->
-            <div id="network-status" class="absolute top-3 left-4 text-xs font-bold bg-white text-gray-800 px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5">
-                <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-green-600 inline-block animate-pulse"></span>
-                <span id="status-text">Online</span>
+    <!-- Authentication Screen -->
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-black text-blue-950 uppercase tracking-wide">MWANAMWEMA SHEIN</h1>
+                <p class="text-sm text-gray-500 mt-1">Official Portal (Permanent Offline PWA)</p>
             </div>
 
-            <h1 class="text-2xl md:text-3xl font-bold tracking-wide mt-2 md:mt-0">MFUMO WA MATOKEO (O-LEVEL)</h1>
-            <p class="text-xs md:text-sm mt-2 text-blue-200">Uwezo wa Kufanya Kazi Bila Mtandao (Offline) Umewezeshwa - Alama Hazipotei Kivinjari Kikifungwa</p>
-            <button id="logout-btn" onclick="logout()" class="absolute top-6 right-6 bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded hidden transition">Toka (Log Out)</button>
-        </header>
+            <div class="flex border-b mb-6">
+                <button id="tab-login" type="button" onclick="switchAuthTab('login')" class="w-1/2 pb-2 font-bold text-blue-900 border-b-2 border-blue-900">Log In</button>
+                <button id="tab-signup" type="button" onclick="switchAuthTab('signup')" class="w-1/2 pb-2 font-bold text-gray-400 border-b-2 border-transparent">Register</button>
+            </div>
 
-        <!-- NOTIFICATION BANNER FOR OFFLINE SYNC -->
-        <div id="sync-banner" class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 mb-6 rounded shadow-sm">
-            <div class="flex items-center justify-between flex-wrap gap-2">
-                <p class="text-sm text-amber-800 font-medium">⚠️ Kuna alama mpya ulizojaza ukiwa Offline ambazo hazijasave mtandaoni bado.</p>
-                <button onclick="saveToCloud()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-4 py-1.5 rounded transition shadow-sm">Tuma Sasa Mtandaoni (Sync)</button>
+            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Select Role</label>
+                    <select id="auth-role" onchange="handleAuthRoleChange()" class="mt-1 block w-full p-2.5 border rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                        <option value="Subject Teacher">Subject Teacher</option>
+                        <option value="Admin">Template Administrator</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Username / Full Name</label>
+                    <input type="text" id="auth-username" required class="mt-1 block w-full p-2.5 border rounded-md shadow-sm focus:ring focus:ring-blue-200" placeholder="e.g., Mwl. Juma">
+                </div>
+
+                <div id="teacher-subject-container" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Education Level</label>
+                        <select id="auth-level" onchange="handleAuthLevelChange()" class="mt-1 block w-full p-2.5 border rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                            <option value="O-Level">O-Level</option>
+                            <option value="A-Level">A-Level</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Your Specialized Subject</label>
+                        <select id="auth-subject" class="mt-1 block w-full p-2.5 border rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                        </select>
+                    </div>
+                </div>
+
+                <div id="password-container">
+                    <label class="block text-sm font-semibold text-gray-700" id="password-label">Password</label>
+                    <input type="password" id="auth-password" required class="mt-1 block w-full p-2.5 border rounded-md shadow-sm focus:ring focus:ring-blue-200" placeholder="******">
+                </div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full bg-blue-950 hover:bg-blue-900 text-white font-bold p-3 rounded-md transition shadow-md">
+                    ENTER PORTAL
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main System Screen -->
+    <div id="main-system" class="hidden">
+        <div class="bg-blue-900 text-white p-4 shadow-md flex flex-col items-center justify-center relative text-center gap-2">
+            <div>
+                <h1 class="text-xl font-bold tracking-wide">MWANAMWEMA SHEIN SEC. SCHOOL</h1>
+                <p class="text-xs text-blue-200 font-medium mt-0.5">Logged in as: <span id="user-display-name" class="font-bold underline"></span> (<span id="user-display-role" class="italic"></span>)</p>
+            </div>
+            <div class="md:absolute md:right-4 md:top-1/2 md:-translate-y-1/2 flex items-center gap-3 mt-2 md:mt-0">
+                <span class="bg-emerald-600 text-white text-xs px-3 py-1 rounded-full font-bold">Offline Storage Active</span>
+                <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded font-bold transition">Logout</button>
             </div>
         </div>
 
-        <!-- AUTH & REGISTRATION SECTION -->
-        <section id="auth-section" class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <div class="flex border-b mb-4">
-                <button id="tab-login" onclick="switchAuthTab('login')" class="py-2 px-4 font-bold border-b-2 border-blue-600 text-blue-600 focus:outline-none">Ingia Mfomoni (Log In)</button>
-                <button id="tab-register" onclick="switchAuthTab('register')" class="py-2 px-4 font-medium text-gray-500 hover:text-blue-600 focus:outline-none">Jisajili Mwalimu Mpya</button>
-            </div>
-
-            <!-- FORM YA KUINGIA (LOG IN) -->
-            <div id="login-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                <div>
-                    <label class="block text-sm font-medium text-gray-600">Jina la Mwalimu au Admin</label>
-                    <input type="text" id="login-name" placeholder="Mf. MWL. JUMA" class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600">Aina ya Akaunti</label>
-                    <select id="login-role" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="user">Mwalimu wa Somo</option>
-                        <option value="admin">Admin (Mkuu wa Taaluma)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600">Neno la Siri (Password)</label>
-                    <input type="password" id="login-password" placeholder="••••••••" class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <button onclick="login()" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 font-semibold transition shadow-sm cursor-pointer">Ingia Kwenye Mfumo</button>
-                </div>
-            </div>
-
-            <!-- FORM YA KUJISAJILI (REGISTER) -->
-            <div id="register-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end hidden">
-                <div>
-                    <label class="block text-sm font-medium text-gray-600">Jina Lako Kamili (Herufi Kubwa)</label>
-                    <input type="text" id="reg-name" placeholder="Mf. MWL. ANNA JUMA" class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600">Somo Unalofundisha</label>
-                    <select id="reg-subject" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="KISW">KISWAHILI (KISW)</option>
-                        <option value="ENG">ENGLISH (ENG)</option>
-                        <option value="MATHS">BASIC MATHEMATICS (MATHS)</option>
-                        <option value="HIST">HISTORY (HIST)</option>
-                        <option value="GEO">GEOGRAPHY (GEO)</option>
-                        <option value="CHEM">CHEMISTRY (CHEM)</option>
-                        <option value="PHYS">PHYSICS (PHYS)</option>
-                        <option value="BIOS">BIOLOGY (BIOS)</option>
-                        <option value="HTM">HISTORIA YA TANZANIA NA MAADILI (HTM)</option>
-                        <option value="BS">BUSINESS STUDIES (BS)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600">Tengeneza Password Yako</label>
-                    <input type="password" id="reg-password" placeholder="Weka password yako hapa" class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div>
-                    <button onclick="registerTeacher()" class="w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 font-semibold transition shadow-sm cursor-pointer">Kamilisha Usajili</button>
-                </div>
-            </div>
-
-            <p id="auth-status" class="mt-3 text-sm font-medium hidden rounded-md p-2"></p>
-        </section>
-
-        <!-- ADMIN SECTION -->
-        <section id="admin-section" class="bg-white p-6 rounded-lg shadow-md mb-6 hidden border-2 border-red-200">
-            <h2 class="text-xl font-bold mb-4 text-red-600 border-b pb-2">Sehemu ya Admin (Usimamizi wa Majina kwa Darasa)</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col justify-between">
-                    <div>
-                        <h3 class="font-semibold text-gray-700 mb-1 text-sm">Hatua ya 1: Pakua Fomati ya Excel</h3>
-                        <p class="text-xs text-gray-500 mb-3">Pakua faili la mfano kisha ujaze majina ya wanafunzi kabla ya kuyapandisha.</p>
-                    </div>
-                    <button onclick="downloadTemplate()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 font-semibold text-xs transition flex items-center justify-center gap-1 cursor-pointer">
-                        ⬇️ Pakua Excel Template
-                    </button>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col justify-between">
-                    <div>
-                        <h3 class="font-semibold text-gray-700 mb-1 text-sm">Hatua ya 2: Pandisha Majina kwenye Darasa</h3>
-                        <p class="text-xs text-red-500 mb-3 font-medium">⚠️ Angalia darasa lililochaguliwa chini kabla ya kubonyeza "Pandisha".</p>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <input type="file" id="excel-file" accept=".xlsx, .xls" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer">
-                        <button onclick="uploadStudents()" class="w-full bg-green-600 text-white px-4 py-1.5 rounded-md hover:bg-green-700 font-semibold text-xs transition cursor-pointer">Pandisha Majina</button>
-                    </div>
-                </div>
-                <div class="bg-red-50 p-4 rounded-lg border border-red-200 flex flex-col justify-between">
-                    <div>
-                        <h3 class="font-semibold text-red-700 mb-1 text-sm">Hatua ya 3: Safisha / Futa Darasa</h3>
-                        <p class="text-xs text-gray-600 mb-3">Ukibonyeza hapa, utafuta kabisa orodha yote ya wanafunzi na alama zao kwenye darasa lililochaguliwa kwa sasa.</p>
-                    </div>
-                    <button onclick="clearCurrentClassData()" class="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 font-semibold text-xs transition cursor-pointer">
-                        🗑️ Futa Majina ya Darasa Hili
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- FILTERS & EXAM DETAILS SECTION -->
-        <section id="filters-section" class="bg-white p-6 rounded-lg shadow-md mb-6 hidden opacity-50 pointer-events-none transition-all duration-300">
-            <h2 class="text-xl font-bold mb-4 text-gray-700 border-b pb-2">Vigezo vya Mtihani na Vichujio</h2>
+        <div class="max-w-4xl mx-auto p-4">
             
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                <div>
-                    <label class="block text-xs font-bold text-blue-800 uppercase">Aina ya Mtihani</label>
-                    <select id="select-exam-type" class="w-full mt-1 p-2 border border-blue-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500" onchange="renderTable()">
-                        <option value="MONTHLY TEST">MONTHLY TEST</option>
-                        <option value="MID-TERM">MID-TERM</option>
-                        <option value="TERMINAL">TERMINAL</option>
-                        <option value="ANNUAL">ANNUAL</option>
-                    </select>
+            <!-- TEACHER SECTION: ONLINE SYNC WITH FIREBASE -->
+            <div id="teacher-sync-panel" class="bg-gradient-to-r from-blue-900 to-indigo-950 text-white p-6 rounded-lg shadow-md mb-6 hidden">
+                <h2 class="text-lg font-bold mb-2">🚀 Go Online to Sync Marks with Admin</h2>
+                <p class="text-xs text-blue-200 mb-4">Ukiwa na mtandao wa internet, bonyeza kitufe kilichopo chini ili kutuma alama zote ulizozisave kwenda kwa Admin.</p>
+                <button onclick="syncLocalMarksToFirebase()" class="bg-yellow-500 hover:bg-yellow-600 text-blue-950 font-black px-6 py-3 rounded shadow transition text-sm">
+                    🔄 SYNC MARKS TO ADMIN (INTERNET REQUIRED)
+                </button>
+            </div>
+
+            <!-- ADMIN SECTION: LIVE SYNCHRONIZATION FROM CLOUD DATABASE -->
+            <div id="admin-sync-receiver-panel" class="bg-white border-2 border-emerald-500 p-6 rounded-lg shadow-md mb-6 hidden">
+                <h2 class="text-lg font-bold text-gray-800 border-b pb-2 mb-3">📥 Sync Marks from Teachers (Cloud Sync)</h2>
+                <p class="text-xs text-gray-600 mb-4">Pakua alama zote zilizotumwa mtandaoni na walimu kuja kwenye kompyuta hii ya Admin.</p>
+                <button onclick="fetchMarksFromFirebaseForAdmin()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2 rounded shadow transition text-sm">
+                    📥 Fetch Fresh Teacher Submissions
+                </button>
+            </div>
+
+            <!-- Filter Form Panel -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-lg font-bold text-gray-800 border-b pb-2 mb-4">Classroom and Examination Filters</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Education Level</label>
+                        <select id="level" required onchange="handleLevelChange()" class="mt-1 block w-full p-2 border rounded-md shadow-sm disabled:bg-gray-100 disabled:text-gray-500">
+                            <option value="O-Level">O-Level</option>
+                            <option value="A-Level">A-Level</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Academic Term</label>
+                        <select id="term" required onchange="loadStudentTable()" class="mt-1 block w-full p-2 border rounded-md shadow-sm">
+                            <option value="Term I">Term I</option>
+                            <option value="Term II">Term II</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Month</label>
+                        <select id="month" required onchange="loadStudentTable()" class="mt-1 block w-full p-2 border rounded-md shadow-sm">
+                            <option value="January">January</option> <option value="February">February</option>
+                            <option value="March">March</option> <option value="April">April</option>
+                            <option value="May">May</option> <option value="June">June</option>
+                            <option value="July">July</option> <option value="August">August</option>
+                            <option value="September">September</option> <option value="October">October</option>
+                            <option value="November">November</option> <option value="December">December</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-blue-800 uppercase">Muhula (Term)</label>
-                    <select id="select-term" class="w-full mt-1 p-2 border border-blue-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500" onchange="renderTable()">
-                        <option value="TERM 1">TERM 1</option>
-                        <option value="TERM 2">TERM 2</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-blue-800 uppercase">Mwezi</label>
-                    <select id="select-month" class="w-full mt-1 p-2 border border-blue-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500" onchange="renderTable()">
-                        <option value="JANUARI">JANUARI</option>
-                        <option value="FEBRUARI">FEBRUARI</option>
-                        <option value="MARCHI">MARCHI</option>
-                        <option value="APRILI">APRILI</option>
-                        <option value="MEI">MEI</option>
-                        <option value="JUNI">JUNI</option>
-                        <option value="JULAI">JULAI</option>
-                        <option value="AGOSTI">AGOSTI</option>
-                        <option value="SEPTEMBA">SEPTEMBA</option>
-                        <option value="OKTOBA">OKTOBA</option>
-                        <option value="NOVEMBA">NOVEMBA</option>
-                        <option value="DESEMBA">DESEMBA</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-blue-800 uppercase">Mwaka</label>
-                    <select id="select-year" class="w-full mt-1 p-2 border border-blue-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500" onchange="renderTable()">
-                        <option value="2026">2026</option>
-                        <option value="2027">2027</option>
-                        <option value="2028">2028</option>
-                        <option value="2029">2029</option>
-                        <option value="2030">2030</option>
-                    </select>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 border-t pt-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Year</label>
+                        <select id="year" required onchange="loadStudentTable()" class="mt-1 block w-full p-2 border rounded-md shadow-sm"></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Class (Form)</label>
+                        <select id="classroom" required onchange="loadStudentTable()" class="mt-1 block w-full p-2 border rounded-md shadow-sm">
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Exam Type</label>
+                        <select id="exam_type" required onchange="loadStudentTable()" class="mt-1 block w-full p-2 border rounded-md shadow-sm">
+                            <option value="Monthly Test">Monthly Test</option>
+                            <option value="Mid-term">Mid-term</option>
+                            <option value="Terminal">Terminal</option>
+                            <option value="Annual">Annual</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Subject</label>
+                        <select id="subject" required onchange="loadStudentTable()" class="mt-1 block w-full p-2 border rounded-md shadow-sm disabled:bg-gray-100 disabled:text-gray-500">
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-600">Chagua Darasa</label>
-                    <select id="select-class" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="renderTable()">
-                        <option value="Form 1">Form 1</option>
-                        <option value="Form 2">Form 2</option>
-                        <option value="Form 3">Form 3</option>
-                        <option value="Form 4">Form 4</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600">Somo (Chaguzi)</label>
-                    <select id="select-subject" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="renderTable()">
-                        <option value="KISW">KISWAHILI (KISW)</option>
-                        <option value="ENG">ENGLISH (ENG)</option>
-                        <option value="MATHS">BASIC MATHEMATICS (MATHS)</option>
-                        <option value="HIST">HISTORY (HIST)</option>
-                        <option value="GEO">GEOGRAPHY (GEO)</option>
-                        <option value="CHEM">CHEMISTRY (CHEM)</option>
-                        <option value="PHYS">PHYSICS (PHYS)</option>
-                        <option value="BIOS">BIOLOGY (BIOS)</option>
-                        <option value="HTM">HISTORIA YA TANZANIA NA MAADILI (HTM)</option>
-                        <option value="BS">BUSINESS STUDIES (BS)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600">Chuja kwa Jinsia</label>
-                    <select id="select-gender" class="w-full mt-1 p-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" onchange="renderTable()">
-                        <option value="All">Wote (Wanaume na Wanawake)</option>
-                        <option value="M">Wanaume Pekee (M)</option>
-                        <option value="F">Wanawake Pekee (F)</option>
-                    </select>
-                </div>
-            </div>
-        </section>
-
-        <!-- TABLE SECTION -->
-        <section id="table-section" class="bg-white p-6 rounded-lg shadow-md hidden opacity-50 pointer-events-none transition-all duration-300">
-            <div class="flex flex-col sm:flex-row justify-between items-center mb-4 border-b pb-2 gap-4">
-                <div class="w-full">
-                    <h2 class="text-lg font-bold text-gray-700">Orodha ya Wanafunzi na Kujaza Alama</h2>
-                    <p class="text-xs text-blue-700 font-semibold" id="exam-summary-display"></p>
-                    <p id="local-save-status" class="text-[11px] text-green-600 font-medium mt-0.5 italic">✓ Alama zote zimehifadhiwa salama kwenye kifaa hiki.</p>
-                </div>
-                <div class="flex gap-2 w-full sm:w-auto">
-                    <button onclick="saveToCloud()" class="flex-1 bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 font-bold text-sm transition shadow-sm cursor-pointer whitespace-nowrap">💾 Tuma Alama Mtandaoni</button>
-                    <button id="download-btn" onclick="downloadExcel()" class="flex-1 bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-800 font-semibold text-sm transition hidden shadow-sm cursor-pointer whitespace-nowrap">Pakua Excel (Admin)</button>
+            <!-- Missing Student Management Form -->
+            <div id="add-missing-student-section" class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6 hidden">
+                <h4 class="text-sm font-bold text-blue-950 mb-2">➕ Missing a student in this list? Register them instantly offline:</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Examination Number</label>
+                        <input type="text" id="new-student-id" placeholder="e.g., S0101/0050" class="border p-2 rounded w-full bg-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Full Name</label>
+                        <input type="text" id="new-student-name" placeholder="e.g., Baraka Shaban" class="border p-2 rounded w-full bg-white text-sm">
+                    </div>
+                    <button type="button" onclick="addNewStudentLocally()" class="bg-blue-900 hover:bg-blue-950 text-white font-bold py-2 px-4 rounded shadow transition text-sm">
+                        Register Student
+                    </button>
                 </div>
             </div>
 
-            <div class="overflow-x-auto rounded-lg border border-gray-200">
-                <table class="min-w-full divide-y divide-gray-200 text-left">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-24">Namba</th>
-                            <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Jina Kamili</th>
-                            <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">Jinsia</th>
-                            <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-32">Alama (0-100)</th>
-                            <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-24">Daraja</th>
-                        </tr>
-                    </thead>
-                    <tbody id="student-table-body" class="bg-white divide-y divide-gray-200"></tbody>
-                </table>
+            <!-- Marks Entry Table Section -->
+            <div id="table-section" class="bg-white p-6 rounded-lg shadow-md mb-6 hidden">
+                <h3 class="text-md font-bold text-blue-900 mb-3 flex justify-between items-center">
+                    <span>Student Assessment Sheet - <span id="current-class-label"></span></span>
+                    <span class="text-xs font-normal text-gray-500 italic">* Progress is auto-saved locally instantly. Partial entry is allowed.</span>
+                </h3>
+                
+                <form id="bulk-marks-form" class="space-y-4">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 border">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider border-r">Exam Number</th>
+                                    <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider border-r">Full Name</th>
+                                    <th class="px-4 py-2 text-center text-xs font-bold text-blue-950 uppercase tracking-wider w-32 border-r">Score (0-100)</th>
+                                    <th class="px-4 py-2 text-center text-xs font-bold text-gray-500 uppercase tracking-wider w-24">Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-table-body" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-950 text-white font-bold p-3 rounded-md hover:bg-blue-900 transition shadow-md">
+                        SAVE MARKS SECURELY ON THIS DEVICE (READY FOR ADMIN)
+                    </button>
+                </form>
             </div>
-        </section>
+
+            <!-- Admin Student Import Panel -->
+            <div id="admin-upload-panel" class="bg-white p-6 rounded-lg shadow-md mb-6 border-l-4 border-green-600 hidden">
+                <div class="flex justify-between items-center border-b pb-2 mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">Admin Control: Upload Master Student Enrollment List</h2>
+                    <div class="flex gap-2">
+                        <button onclick="downloadStudentTemplate()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded transition shadow">📥 Download Template</button>
+                        <button onclick="clearStudentRegistry()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-3 py-1.5 rounded transition shadow">🗑️ Purge All</button>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row gap-4 items-center">
+                    <input type="file" id="excel-file" accept=".xlsx, .xls" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0">
+                    <button onclick="uploadStudentList()" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 rounded-md transition">📤 Upload Excel List</button>
+                </div>
+                <div class="mt-2 text-xs text-gray-500">Total registered school strength: <span id="total-students-count" class="font-bold text-green-600">0</span></div>
+            </div>
+
+            <!-- Admin Registered Teachers Profiles Management Panel -->
+            <div id="admin-teachers-panel" class="bg-white p-6 rounded-lg shadow-md mb-6 border-l-4 border-blue-900 hidden">
+                <h2 class="text-lg font-bold text-gray-800 border-b pb-2 mb-4">Registered Teachers Accounts Control</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 border text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left font-bold text-gray-600 border-r">Username</th>
+                                <th class="px-4 py-2 text-left font-bold text-gray-600 border-r">Level Assigned</th>
+                                <th class="px-4 py-2 text-left font-bold text-gray-600 border-r">Subject</th>
+                                <th class="px-4 py-2 text-center font-bold text-gray-600">Actions Operations</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teachers-table-body" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Admin Systems Management Panel -->
+            <div id="admin-management-panel" class="bg-white text-gray-900 border p-6 rounded-lg shadow-md mb-6 hidden">
+                <h2 class="text-lg font-bold border-b pb-2 mb-4 text-gray-800">Admin Master Data Records Controls</h2>
+                <div class="flex flex-wrap gap-4">
+                    <button type="button" onclick="downloadExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-md transition shadow flex items-center gap-2">
+                        📥 Download Consolidated Master Excel File (All Marks)
+                    </button>
+                    <button type="button" onclick="clearLocalDatabase()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-4 py-2 rounded-md transition ml-auto">🗑️ Clear Assessment Records From Device</button>
+                </div>
+
+                <div class="mt-6 bg-gray-800 text-white p-4 rounded">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">Device Storage Summary (Saved Marks for Admin): (<span id="local-count" class="text-yellow-400 font-bold">0</span>) records</h3>
+                    <div class="overflow-x-auto max-h-64 rounded bg-gray-900 p-2 text-xs font-mono" id="data-preview">No records detected in local database store.</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        const FIREBASE_URL = "https://mwanamwema-shein-portal-default-rtdb.firebaseio.com/"; 
-        const ADMIN_PASSWORD = "Necta2026"; 
-
-        let registeredTeachers = {};
-        let classesDatabase = { "Form 1": [], "Form 2": [], "Form 3": [], "Form 4": [] };
-        let currentRole = "guest";
-        let teacherSubject = "";
-        let isOnline = true;
-
-        // 1. ANGALIA HALI YA MTANDAO LIVE
-        function updateNetworkStatus() {
-            const dot = document.getElementById('status-dot');
-            const text = document.getElementById('status-text');
-            if (navigator.onLine) {
-                isOnline = true;
-                dot.className = "w-2.5 h-2.5 rounded-full bg-green-600 inline-block animate-pulse";
-                text.innerText = "Online";
-                checkUnsyncedData();
-            } else {
-                isOnline = false;
-                dot.className = "w-2.5 h-2.5 rounded-full bg-red-600 inline-block";
-                text.innerText = "Offline";
-            }
-        }
-        window.addEventListener('online', updateNetworkStatus);
-        window.addEventListener('offline', updateNetworkStatus);
-
-        // 2. PAKUA DATA ZA MWANZO KUTOKA LOCALSTORAGE AU CLOUD
-        async function loadInitialData() {
-            // Pakua data za walimu zilizopo locally kwanza
-            let localTeachers = localStorage.getItem('local_teachers');
-            if (localTeachers) registeredTeachers = JSON.parse(localTeachers);
-
-            // Pakua database ya wanafunzi iliyopo locally kwanza
-            let localSchoolDb = localStorage.getItem('local_school_database');
-            if (localSchoolDb) classesDatabase = JSON.parse(localSchoolDb);
-
-            updateNetworkStatus();
-
-            if (navigator.onLine) {
-                try {
-                    let resTeachers = await fetch(`${FIREBASE_URL}/teachers.json`);
-                    let dataTeachers = await resTeachers.json();
-                    if(dataTeachers) {
-                        registeredTeachers = dataTeachers;
-                        localStorage.setItem('local_teachers', JSON.stringify(registeredTeachers));
-                    }
-
-                    let resStudents = await fetch(`${FIREBASE_URL}/school_database.json`);
-                    let dataStudents = await resStudents.json();
-                    if(dataStudents) {
-                        // Kuzuia ku-overwrite kama kuna data za offline ambazo hazijasave
-                        if(!localStorage.getItem('has_unsynced_data')) {
-                            classesDatabase = dataStudents;
-                            localStorage.setItem('local_school_database', JSON.stringify(classesDatabase));
-                        }
-                    }
-                } catch (e) { console.log("Hali ya mtandao inasumbua. Kutumia data za kifaa (Offline mode)."); }
-            }
-            checkUnsyncedData();
-        }
-        loadInitialData();
-
-        function checkUnsyncedData() {
-            const banner = document.getElementById('sync-banner');
-            if (localStorage.getItem('has_unsynced_data') === 'true') {
-                banner.classList.remove('hidden');
-            } else {
-                banner.classList.add('hidden');
-            }
+        // Inline Permanent Service Worker Registration for Complete Offline Support
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                const CACHE_NAME = 'mwanashein-v1';
+                const ASSETS = [
+                    './',
+                    './index.html',
+                    'https://cdn.tailwindcss.com',
+                    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+                    'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js',
+                    'https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js'
+                ];
+                self.addEventListener('install', e => {
+                    e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
+                });
+                self.addEventListener('activate', e => {
+                    e.waitUntil(caches.keys().then(keys => Promise.all(keys.map(k => k !== CACHE_NAME ? caches.delete(k) : null))).then(() => self.clients.claim()));
+                });
+                self.addEventListener('fetch', e => {
+                    if (e.request.url.includes('firebase')) return; // let firebase bypass cache
+                    e.respondWith(caches.match(e.request).then(res => res || fetch(e.request).catch(() => caches.match('./index.html'))));
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'text/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob))
+                .then(() => console.log('PWA Permanent Offline Engine Enabled!'))
+                .catch(err => console.log('SW engine failed:', err));
         }
 
-        function switchAuthTab(tab) {
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
+        const firebaseConfig = {
+            databaseURL: "https://mwanamwema-shein-portal-default-rtdb.firebaseio.com" 
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let currentAuthMode = "login"; 
+        let loggedInUser = null;
+        let db;
+
+        const subjectsList = {
+            "O-Level": ["Historia ya Tanzania na Maadili", "Business Studies", "History", "Kiswahili", "English", "Basic Mathematics", "Biology", "Chemistry", "Physics"],
+            "A-Level": ["Historia ya Tanzania na Maadili", "Academic Communication", "History", "Geography", "Kiswahili", "English Language", "Fasihi ya Kiswahili", "Literature in English"]
+        };
+
+        const classesList = {
+            "O-Level": ["Form 1", "Form 2", "Form 3", "Form 4"],
+            "A-Level": ["Form 5", "Form 6"]
+        };
+
+        let allStudents = [];
+
+        // IndexedDB initialization
+        const request = indexedDB.open("MwanamwemaPWA_DB", 10);
+
+        request.onupgradeneeded = function(e) {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains("marks")) db.createObjectStore("marks", { autoIncrement: true });
+            if (!db.objectStoreNames.contains("students")) db.createObjectStore("students", { keyPath: "Namba" });
+            if (!db.objectStoreNames.contains("users")) db.createObjectStore("users", { keyPath: "username" });
+            if (!db.objectStoreNames.contains("drafts")) db.createObjectStore("drafts", { keyPath: "draft_id" });
+        };
+
+        request.onsuccess = function(e) {
+            db = e.target.result;
+            refreshPreview();
+            loadStudentsFromDB();
+        };
+
+        function switchAuthTab(mode) {
+            currentAuthMode = mode;
+            const btn = document.getElementById('auth-submit-btn');
             const tabLogin = document.getElementById('tab-login');
-            const tabRegister = document.getElementById('tab-register');
-            document.getElementById('auth-status').classList.add('hidden');
-
-            if (tab === 'login') {
-                loginForm.classList.remove('hidden');
-                registerForm.classList.add('hidden');
-                tabLogin.className = "py-2 px-4 font-bold border-b-2 border-blue-600 text-blue-600";
-                tabRegister.className = "py-2 px-4 font-medium text-gray-500 hover:text-blue-600";
+            const tabSignup = document.getElementById('tab-signup');
+            const passwordLabel = document.getElementById('password-label');
+            
+            if(mode === "login") {
+                btn.innerText = "ENTER PORTAL";
+                passwordLabel.innerText = "Password";
+                tabLogin.className = "w-1/2 pb-2 font-bold text-blue-900 border-b-2 border-blue-900";
+                tabSignup.className = "w-1/2 pb-2 font-bold text-gray-400 border-b-2 border-transparent";
             } else {
-                if(!isOnline) {
-                    alert("Huwezi kusajili mwalimu mpya ukiwa Offline! Tafadhali washa intaneti kwanza.");
-                    return;
-                }
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-                tabLogin.className = "py-2 px-4 font-medium text-gray-500 hover:text-blue-600";
-                tabRegister.className = "py-2 px-4 font-bold border-b-2 border-blue-600 text-blue-600";
+                btn.innerText = "CREATE PROFILE ACCOUNT";
+                passwordLabel.innerText = "Choose Secure Password";
+                tabLogin.className = "w-1/2 pb-2 font-bold text-gray-400 border-b-2 border-transparent";
+                tabSignup.className = "w-1/2 pb-2 font-bold text-blue-900 border-b-2 border-blue-900";
             }
+            handleAuthRoleChange(); 
         }
 
-        async function registerTeacher() {
-            if(!isOnline) return alert("Unganisha intaneti kusajili mwalimu mpya.");
-            const name = document.getElementById('reg-name').value.trim().toUpperCase();
-            const subject = document.getElementById('reg-subject').value;
-            const password = document.getElementById('reg-password').value;
-            if (!name || !password) return alert("Jaza Jina na Password kikamilifu!");
-
-            registeredTeachers[name] = { subject: subject, password: password };
-
-            try {
-                await fetch(`${FIREBASE_URL}/teachers.json`, {
-                    method: 'PUT',
-                    body: JSON.stringify(registeredTeachers)
-                });
-                localStorage.setItem('local_teachers', JSON.stringify(registeredTeachers));
-                alert(`Usajili Umefanikiwa! Mwl. ${name} ingia sasa.`);
-                document.getElementById('reg-name').value = "";
-                document.getElementById('reg-password').value = "";
-                switchAuthTab('login');
-            } catch(e) { alert("Imefeli kusajili kutokana na mtandao."); }
-        }
-
-        function login() {
-            const name = document.getElementById('login-name').value.trim().toUpperCase();
-            const selectedRole = document.getElementById('login-role').value;
-            const passwordInput = document.getElementById('login-password').value;
-            const status = document.getElementById('auth-status');
+        function handleAuthRoleChange() {
+            const role = document.getElementById('auth-role').value;
+            const subjectContainer = document.getElementById('teacher-subject-container');
+            const passwordContainer = document.getElementById('password-container');
+            const passwordInput = document.getElementById('auth-password');
             
-            if (selectedRole === 'admin') {
-                if (passwordInput !== ADMIN_PASSWORD) {
-                    status.innerText = "⚠️ Neno la Siri la Admin sio sahihi!";
-                    status.className = "mt-3 text-sm font-medium text-red-600 bg-red-50 p-2 rounded-md block";
-                    return;
+            if(role === "Subject Teacher") {
+                passwordContainer.classList.remove('hidden');
+                passwordInput.required = true;
+                if (currentAuthMode === "signup") {
+                    subjectContainer.classList.remove('hidden');
+                    handleAuthLevelChange();
+                } else {
+                    subjectContainer.classList.add('hidden');
                 }
-                currentRole = 'admin';
-                document.getElementById('admin-section').classList.remove('hidden');
-                document.getElementById('download-btn').classList.remove('hidden');
-                document.getElementById('select-subject').disabled = false;
             } else {
-                const teacher = registeredTeachers[name];
-                if (!teacher || teacher.password !== passwordInput) {
-                    status.innerText = "⚠️ Jina la Mwalimu au Password sio sahihi (Ama kifaa hakina kumbukumbu ya mwalimu huyu ukiwa Offline)!";
-                    status.className = "mt-3 text-sm font-medium text-red-600 bg-red-50 p-2 rounded-md block";
-                    return;
-                }
-                currentRole = 'user';
-                teacherSubject = teacher.subject;
-                
-                const subjSelect = document.getElementById('select-subject');
-                subjSelect.value = teacherSubject;
-                subjSelect.disabled = true;
-                subjSelect.classList.add('bg-gray-200');
+                passwordContainer.classList.remove('hidden');
+                passwordInput.required = true;
+                subjectContainer.classList.add('hidden');
             }
-
-            document.getElementById('logout-btn').classList.remove('hidden');
-            document.getElementById('filters-section').classList.remove('hidden', 'opacity-50', 'pointer-events-none');
-            document.getElementById('table-section').classList.remove('hidden', 'opacity-50', 'pointer-events-none');
-            
-            document.querySelectorAll('#auth-section input, #auth-section select, #auth-section button').forEach(el => {
-                if(el.id !== 'auth-status') el.disabled = true;
-            });
-
-            renderTable();
         }
 
-        function calculateGrade(score) {
-            if (score === "" || score === undefined || isNaN(score)) return "-";
-            score = parseFloat(score);
-            if (score >= 75) return "A";
-            if (score >= 65) return "B";
-            if (score >= 45) return "C";
-            if (score >= 30) return "D";
-            return "F";
-        }
-
-        function getExamKey(subject) {
-            const examType = document.getElementById('select-exam-type').value;
-            const term = document.getElementById('select-term').value;
-            const month = document.getElementById('select-month').value;
-            const year = document.getElementById('select-year').value;
-            return `${subject}_${examType}_${term}_${month}_${year}`;
-        }
-
-        function renderTable() {
-            const currentClass = document.getElementById('select-class').value;
-            const subject = document.getElementById('select-subject').value;
-            const genderFilter = document.getElementById('select-gender').value;
-            const tbody = document.getElementById('student-table-body');
-            
-            const examType = document.getElementById('select-exam-type').value;
-            const term = document.getElementById('select-term').value;
-            const month = document.getElementById('select-month').value;
-            const year = document.getElementById('select-year').value;
-            
-            document.getElementById('exam-summary-display').innerText = `Somo: ${subject} | Aina: ${examType} | Muhula: ${term} | Mwezi: ${month} | Mwaka: ${year}`;
-            
-            const examKey = getExamKey(subject);
-            tbody.innerHTML = "";
-            const currentStudents = classesDatabase[currentClass] || [];
-            const filteredStudents = currentStudents.filter(s => genderFilter === "All" || s.gender === genderFilter);
-
-            if(filteredStudents.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-sm text-gray-500">Hakuna wanafunzi kwenye darasa hili.</td></tr>`;
-                return;
-            }
-
-            filteredStudents.forEach((student, index) => {
-                if(!student.marks) student.marks = {};
-                const currentMark = student.marks[examKey] !== undefined ? student.marks[examKey] : "";
-                const currentGrade = calculateGrade(currentMark);
-
-                const row = document.createElement('tr');
-                row.className = "hover:bg-gray-50 border-b border-gray-100";
-                row.innerHTML = `
-                    <td class="px-4 py-3 text-sm font-medium text-gray-900">${student.id}</td>
-                    <td class="px-4 py-3 text-sm text-gray-700">${student.name}</td>
-                    <td class="px-4 py-3 text-sm text-gray-500">${student.gender}</td>
-                    <td class="px-4 py-3 text-sm">
-                        <input type="number" min="0" max="100" value="${currentMark}" 
-                            data-id="${student.id}"
-                            oninput="updateLiveGrade(this, '${student.id}', '${examKey}')" 
-                            onkeydown="handleNavigation(event, ${index})"
-                            class="mark-input w-20 p-1 border border-gray-300 rounded text-center focus:ring-2 focus:ring-blue-400 focus:outline-none">
-                    </td>
-                    <td id="grade-${student.id}" class="px-4 py-3 text-sm font-bold ${currentGrade === 'F' ? 'text-red-600' : 'text-green-700'}">${currentGrade}</td>
-                `;
-                tbody.appendChild(row);
+        function handleAuthLevelChange() {
+            const level = document.getElementById('auth-level').value;
+            const subSelect = document.getElementById('auth-subject');
+            subSelect.innerHTML = '';
+            subjectsList[level].forEach(sub => {
+                let opt = document.createElement('option'); opt.value = sub; opt.innerText = sub; subSelect.appendChild(opt);
             });
         }
 
-        function updateLiveGrade(inputElement, studentId, examKey) {
-            const currentClass = document.getElementById('select-class').value;
-            let val = inputElement.value;
-            
-            if (val !== "") {
-                val = parseFloat(val);
-                if (val < 0 || val > 100 || isNaN(val)) {
-                    alert("Alama lazima ziwe 0 hadi 100!");
-                    inputElement.value = "";
-                    val = "";
+        function handleAuth(e) {
+            e.preventDefault();
+            const role = document.getElementById('auth-role').value;
+            const username = document.getElementById('auth-username').value.trim();
+            const password = document.getElementById('auth-password').value;
+
+            if (role === "Admin") {
+                if (password === "Mwanashein") {
+                    loggedInUser = { username: username || "Admin", role: "Admin" };
+                    setupUserEnvironment();
+                } else {
+                    alert("Access Denied: Administrative security key signature is invalid.");
                 }
-            }
-            
-            const student = classesDatabase[currentClass]?.find(s => s.id === studentId);
-            if (student) {
-                if(!student.marks) student.marks = {};
-                if(val === "") delete student.marks[examKey];
-                else student.marks[examKey] = val;
-            }
-
-            const gradeTd = document.getElementById(`grade-${studentId}`);
-            const grade = calculateGrade(val);
-            gradeTd.innerText = grade;
-            gradeTd.className = `px-4 py-3 text-sm font-bold ${grade === 'F' ? 'text-red-600' : 'text-green-700'}`;
-
-            // IFADHI PAPO HAPO KWENYE LOCAL STORAGE (OFFLINE AUTO-SAVE)
-            localStorage.setItem('local_school_database', JSON.stringify(classesDatabase));
-            localStorage.setItem('has_unsynced_data', 'true');
-            
-            const localStatus = document.getElementById('local-save-status');
-            localStatus.innerText = "✍️ Alama inahifadhiwa kwenye kifaa (Offline)...";
-            localStatus.className = "text-[11px] text-amber-600 font-medium mt-0.5 italic";
-            
-            setTimeout(() => {
-                localStatus.innerText = "✓ Alama zote zimehifadhiwa salama kwenye kifaa hiki.";
-                localStatus.className = "text-[11px] text-green-600 font-medium mt-0.5 italic";
-            }, 800);
-
-            checkUnsyncedData();
-        }
-
-        function handleNavigation(event, index) {
-            const inputs = document.querySelectorAll('.mark-input');
-            if (event.key === "Enter" || event.key === "ArrowDown") {
-                event.preventDefault();
-                if (inputs[index + 1]) inputs[index + 1].focus();
-            } else if (event.key === "ArrowUp") {
-                event.preventDefault();
-                if (inputs[index - 1]) inputs[index - 1].focus();
-            }
-        }
-
-        // 3. TUMA DATA MTANDAONI KUTOKA KWENYE MEMORY YA KIFAA
-        async function saveToCloud() {
-            if(!navigator.onLine) {
-                alert("❌ Huwezi kutuma alama mtandaoni kwa sasa kwa sababu huna INTANETI! Mfumo umezihifadhi salama kwenye simu yako. Mtandao ukirudi utabonyeza kifungo hiki.");
                 return;
             }
 
-            try {
-                // Kuvuta data za mwisho zilizopo local na kuzituma Firebase
-                let currentLocalDb = localStorage.getItem('local_school_database');
-                if (currentLocalDb) classesDatabase = JSON.parse(currentLocalDb);
+            const tx = db.transaction("users", "readwrite");
+            const store = tx.objectStore("users");
 
-                await fetch(`${FIREBASE_URL}/school_database.json`, {
-                    method: 'PUT',
-                    body: JSON.stringify(classesDatabase)
-                });
+            if(currentAuthMode === "signup") {
+                const userData = { 
+                    username: username, 
+                    role: role,
+                    password: password,
+                    level: document.getElementById('auth-level').value,
+                    subject: document.getElementById('auth-subject').value
+                };
                 
-                localStorage.setItem('has_unsynced_data', 'false');
-                checkUnsyncedData();
-                alert("✔️ Alama zote zilizojazwa (Offline & Online) zimetumwa na kuhifadhiwa kikamilifu kwenye Server!");
-            } catch (e) { 
-                alert("Hitilafu ya Mtandao! Imeshindwa kufika kwenye Server. Data bado ipo salama kwenye simu yako."); 
+                store.put(userData);
+                tx.oncomplete = function() {
+                    alert("Profile generated completely! You can log in now.");
+                    switchAuthTab('login');
+                };
+            } else {
+                store.get(username).onsuccess = function(e) {
+                    const user = e.target.result;
+                    if(!user) {
+                        alert("Account profile missing. Please register this account profile first.");
+                        return;
+                    }
+                    if(user.password !== password) {
+                        alert("Access Denied: Incorrect credentials passcode match.");
+                        return;
+                    }
+                    loggedInUser = user;
+                    setupUserEnvironment();
+                };
             }
         }
 
-        function downloadTemplate() {
-            const currentClass = document.getElementById('select-class').value;
-            const templateData = [{ "Namba": "S001", "Jina": "ANNA JUMA", "Jinsia": "F" }];
+        function setupUserEnvironment() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('main-system').classList.remove('hidden');
+            document.getElementById('user-display-name').innerText = loggedInUser.username;
+            
+            const levelSelect = document.getElementById('level');
+            const subjectSelect = document.getElementById('subject');
+
+            if(loggedInUser.role === "Admin") {
+                document.getElementById('user-display-role').innerText = "Administrator";
+                document.getElementById('admin-upload-panel').classList.remove('hidden');
+                document.getElementById('admin-management-panel').classList.remove('hidden');
+                document.getElementById('admin-sync-receiver-panel').classList.remove('hidden');
+                document.getElementById('admin-teachers-panel').classList.remove('hidden');
+                document.getElementById('teacher-sync-panel').classList.add('hidden');
+                levelSelect.disabled = false;
+                subjectSelect.disabled = false;
+                handleLevelChange();
+                loadTeachersListForAdmin();
+            } else {
+                document.getElementById('user-display-role').innerText = `Instructor: ${loggedInUser.subject || 'Masomo'}`;
+                document.getElementById('admin-upload-panel').classList.add('hidden');
+                document.getElementById('admin-management-panel').classList.add('hidden');
+                document.getElementById('admin-sync-receiver-panel').classList.add('hidden');
+                document.getElementById('admin-teachers-panel').classList.add('hidden');
+                document.getElementById('teacher-sync-panel').classList.remove('hidden');
+                
+                if(loggedInUser.level) levelSelect.value = loggedInUser.level;
+                levelSelect.disabled = true;
+                handleLevelChange();
+                if(loggedInUser.subject) subjectSelect.value = loggedInUser.subject;
+                subjectSelect.disabled = true;
+            }
+            loadStudentTable();
+            refreshPreview();
+        }
+
+        function loadTeachersListForAdmin() {
+            const tableBody = document.getElementById('teachers-table-body');
+            tableBody.innerHTML = '';
+            
+            db.transaction("users", "readonly").objectStore("users").getAll().onsuccess = function(e) {
+                const teachers = e.target.result;
+                if(teachers.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-4 text-center text-gray-400 italic">No registered teachers found.</td></tr>`;
+                    return;
+                }
+                
+                teachers.forEach(t => {
+                    let row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-4 py-2 border-r font-medium text-gray-900">${t.username}</td>
+                        <td class="px-4 py-2 border-r text-gray-600">${t.level || 'N/A'}</td>
+                        <td class="px-4 py-2 border-r text-blue-800">${t.subject || 'N/A'}</td>
+                        <td class="px-4 py-2 text-center space-x-2">
+                            <button onclick="resetTeacherPassword('${t.username}')" class="bg-yellow-500 hover:bg-yellow-600 text-blue-950 font-semibold px-2 py-1 rounded text-xs shadow transition">Reset Password</button>
+                            <button onclick="deleteTeacherAccount('${t.username}')" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-2 py-1 rounded text-xs shadow transition">Delete Account</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            };
+        }
+
+        function resetTeacherPassword(username) {
+            if(confirm(`Reset credentials for "${username}"? Default password will be set to: Mwanashein123`)) {
+                const tx = db.transaction("users", "readwrite");
+                const store = tx.objectStore("users");
+                store.get(username).onsuccess = function(e) {
+                    const user = e.target.result;
+                    if(user) {
+                        user.password = "Mwanashein123";
+                        store.put(user);
+                        alert("Password configuration parameters successfully reverted to default.");
+                        loadTeachersListForAdmin();
+                    }
+                };
+            }
+        }
+
+        function deleteTeacherAccount(username) {
+            if(confirm(`Are you sure you want to delete "${username}"?`)) {
+                db.transaction("users", "readwrite").objectStore("users").delete(username).onsuccess = function() {
+                    alert("Account profile purged cleanly.");
+                    loadTeachersListForAdmin();
+                };
+            }
+        }
+
+        function generateYears() {
+            const yearSelect = document.getElementById('year');
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear; i >= currentYear - 3; i--) {
+                let opt = document.createElement('option'); opt.value = i; opt.innerText = i; yearSelect.appendChild(opt);
+            }
+        }
+
+        function calculateGrade(score, level) {
+            if (score === "" || isNaN(score)) return "";
+            const s = parseInt(score);
+            if (level === "O-Level") {
+                if (s >= 75) return "A"; if (s >= 65) return "B"; if (s >= 45) return "C"; if (s >= 30) return "D"; return "F";
+            } else { 
+                if (s >= 80) return "A"; if (s >= 70) return "B"; if (s >= 60) return "C"; if (s >= 50) return "D"; if (s >= 40) return "E"; if (s >= 35) return "S"; return "F";
+            }
+        }
+
+        function handleLevelChange() {
+            const level = document.getElementById('level').value;
+            const subjectSelect = document.getElementById('subject');
+            subjectSelect.innerHTML = '';
+            subjectsList[level].forEach(sub => {
+                let opt = document.createElement('option'); opt.value = sub; opt.innerText = sub; subjectSelect.appendChild(opt);
+            });
+
+            const classSelect = document.getElementById('classroom');
+            classSelect.innerHTML = '';
+            classesList[level].forEach(cls => {
+                let opt = document.createElement('option'); opt.value = cls; opt.innerText = cls; classSelect.appendChild(opt);
+            });
+            loadStudentTable();
+        }
+
+        function getDraftFilterUID() {
+            const lvl = document.getElementById('level').value;
+            const sub = document.getElementById('subject').value;
+            const cls = document.getElementById('classroom').value;
+            const trm = document.getElementById('term').value;
+            const mnt = document.getElementById('month').value;
+            const yr = document.getElementById('year').value;
+            const exm = document.getElementById('exam_type').value;
+            return `draft_${lvl}_${sub}_${cls}_${trm}_${mnt}_${yr}_${exm}`;
+        }
+
+        function loadStudentTable() {
+            if (!loggedInUser) return;
+            const selectedClass = document.getElementById('classroom').value;
+            const level = document.getElementById('level').value;
+            const term = document.getElementById('term').value;
+            const month = document.getElementById('month').value;
+            const year = document.getElementById('year').value;
+            const exam_type = document.getElementById('exam_type').value;
+            const subject = document.getElementById('subject').value;
+
+            const tableSection = document.getElementById('table-section');
+            const tableBody = document.getElementById('student-table-body');
+            const missingStudentForm = document.getElementById('add-missing-student-section');
+            
+            tableBody.innerHTML = '';
+            if(!selectedClass) { missingStudentForm.classList.add('hidden'); return; }
+            
+            document.getElementById('current-class-label').innerText = selectedClass;
+            missingStudentForm.classList.remove('hidden');
+
+            const filteredStudents = allStudents.filter(s => s.Darasa.toString().trim().toLowerCase() === selectedClass.trim().toLowerCase());
+
+            if (filteredStudents.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-sm text-gray-400 italic">No student rosters imported under this classroom tier.</td></tr>`;
+                tableSection.classList.remove('hidden');
+                return;
+            }
+
+            db.transaction(["marks", "drafts"], "readonly").objectStore("drafts").get(getDraftFilterUID()).onsuccess = function(e) {
+                const liveDraftContainer = e.target.result ? e.target.result.scores : {};
+
+                db.transaction("marks", "readonly").objectStore("marks").getAll().onsuccess = function(ev) {
+                    const savedMarks = ev.target.result;
+
+                    filteredStudents.forEach((student, index) => {
+                        const existingRecord = savedMarks.find(m => 
+                            m.student_id === student.Namba && m.level === level && m.term === term &&
+                            m.month === month && m.year === year && m.classroom === selectedClass &&
+                            m.exam_type === exam_type && m.subject === subject
+                        );
+
+                        let scoreValue = "";
+                        if (liveDraftContainer[student.Namba] !== undefined) {
+                            scoreValue = liveDraftContainer[student.Namba];
+                        } else if (existingRecord) {
+                            scoreValue = existingRecord.score;
+                        }
+
+                        const gradeValue = scoreValue !== "" ? calculateGrade(scoreValue, level) : "-";
+
+                        let row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="px-4 py-2 border-r text-sm">${student.Namba}</td>
+                            <td class="px-4 py-2 border-r text-sm font-medium">${student.Jina}</td>
+                            <td class="px-4 py-1 border-r">
+                                <input type="number" value="${scoreValue}" data-id="${student.Namba}" data-name="${student.Jina}" id="score-input-${index}"
+                                    oninput="handleLiveScoreTyping(this, '${level}', 'grade-label-${index}')" class="score-input w-full p-1 border rounded text-center font-bold">
+                            </td>
+                            <td class="px-4 py-2 text-center text-sm font-black text-blue-900" id="grade-label-${index}">${gradeValue}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                };
+            };
+            tableSection.classList.remove('hidden');
+        }
+
+        function handleLiveScoreTyping(input, level, labelId) {
+            const grade = calculateGrade(input.value, level);
+            document.getElementById(labelId).innerText = grade || "-";
+
+            const filterUID = getDraftFilterUID();
+            const tx = db.transaction("drafts", "readwrite");
+            const store = tx.objectStore("drafts");
+
+            store.get(filterUID).onsuccess = function(e) {
+                let currentDraft = e.target.result ? e.target.result : { draft_id: filterUID, scores: {} };
+                const studentId = input.getAttribute('data-id');
+
+                if (input.value.trim() !== "") {
+                    currentDraft.scores[studentId] = input.value;
+                } else {
+                    delete currentDraft.scores[studentId];
+                }
+                store.put(currentDraft);
+            };
+        }
+
+        function addNewStudentLocally() {
+            const id = document.getElementById('new-student-id').value.trim();
+            const name = document.getElementById('new-student-name').value.trim();
+            const currentClass = document.getElementById('classroom').value;
+
+            if(!id || !name) return;
+            db.transaction("students", "readwrite").objectStore("students").put({ Namba: id, Jina: name, Darasa: currentClass }).onsuccess = function() {
+                alert("Student entry added!"); loadStudentsFromDB();
+            };
+        }
+
+        function loadStudentsFromDB() {
+            if(!db) return;
+            db.transaction("students", "readonly").objectStore("students").getAll().onsuccess = function(e) {
+                allStudents = e.target.result;
+                document.getElementById('total-students-count').innerText = allStudents.length;
+                if(loggedInUser) loadStudentTable();
+            };
+        }
+
+        document.getElementById('bulk-marks-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const inputs = document.querySelectorAll('.score-input');
+            const tx = db.transaction(["marks", "drafts"], "readwrite");
+            const store = tx.objectStore("marks");
+            
+            const currentLevel = document.getElementById('level').value;
+            const currentSubject = document.getElementById('subject').value;
+            let counterSaved = 0;
+
+            inputs.forEach(input => {
+                if(input && input.value.trim() !== "") {
+                    store.add({
+                        teacher: loggedInUser.username, level: currentLevel,
+                        term: document.getElementById('term').value, month: document.getElementById('month').value,
+                        year: document.getElementById('year').value, classroom: document.getElementById('classroom').value,
+                        exam_type: document.getElementById('exam_type').value, subject: currentSubject,
+                        student_id: input.getAttribute('data-id'), student_name: input.getAttribute('data-name'),
+                        score: parseInt(input.value), grade: calculateGrade(input.value, currentLevel),
+                        timestamp: new Date().toLocaleString()
+                    });
+                    counterSaved++;
+                }
+            });
+
+            if (counterSaved === 0) {
+                alert("Please insert a score entry for at least one student before saving.");
+                return;
+            }
+
+            tx.objectStore("drafts").delete(getDraftFilterUID());
+
+            tx.oncomplete = function() {
+                alert(`Successfully saved ${counterSaved} records offline! Connect to the internet later to sync with Admin.`);
+                loadStudentTable(); refreshPreview();
+            };
+        });
+
+        function syncLocalMarksToFirebase() {
+            if (!navigator.onLine) {
+                alert("Haujaunganishwa kwenye mtandao (Offline). Tafadhali washa data au unganisha Wi-Fi kwanza ndipo ubonyeze kitufe hiki!");
+                return;
+            }
+
+            db.transaction("marks", "readonly").objectStore("marks").getAll().onsuccess = function(e) {
+                const allMarks = e.target.result;
+                const teacherMarks = allMarks.filter(m => m.teacher === loggedInUser.username);
+
+                if(teacherMarks.length === 0) {
+                    alert("Hakuna alama mpya zilizohifadhiwa kwenye kifaa hiki tayari kwa kutumwa.");
+                    return;
+                }
+
+                database.ref("mwanamwema_portal/marks").push(teacherMarks, function(error) {
+                    if (error) {
+                        alert("Imeshindikana kutuma: " + error.message);
+                    } else {
+                        alert(`Hongera! Alama ${teacherMarks.length} zimetumwa kikamilifu kwa Admin mtandaoni.`);
+                    }
+                });
+            };
+        }
+
+        function fetchMarksFromFirebaseForAdmin() {
+            if (!navigator.onLine) {
+                alert("Mfumo upo offline. Unganisha internet ili kupakua data kutoka kwa walimu.");
+                return;
+            }
+
+            database.ref("mwanamwema_portal/marks").once("value", function(snapshot) {
+                const cloudData = snapshot.val();
+                if(!cloudData) {
+                    alert("Hakuna data yoyote mpya kwenye cloud kwa sasa.");
+                    return;
+                }
+
+                const tx = db.transaction("marks", "readwrite");
+                const store = tx.objectStore("marks");
+                let counter = 0;
+
+                Object.values(cloudData).forEach(marksGroup => {
+                    if(Array.isArray(marksGroup)) {
+                        marksGroup.forEach(record => {
+                            store.add(record);
+                            counter++;
+                        });
+                    }
+                });
+
+                tx.oncomplete = function() {
+                    alert(`Imefanikiwa! Alama ${counter} zimeondolewa kwenye cloud na kuwekwa kwenye kompyuta ya Admin.`);
+                    refreshPreview(); loadStudentTable();
+                };
+            });
+        }
+
+        function refreshPreview() {
+            if(!db) return;
+            db.transaction("marks", "readonly").objectStore("marks").getAll().onsuccess = function(e) {
+                const data = e.target.result;
+                document.getElementById('local-count').innerText = data.length;
+                const previewDiv = document.getElementById('data-preview');
+                if (data.length === 0) { previewDiv.innerText = "No data records inside local memory."; return; }
+
+                let tableHtml = `<table class="w-full text-left border-collapse text-[11px]"><tr class="bg-gray-700 text-yellow-400"><th class="p-1 border">Teacher</th><th class="p-1 border">Class</th><th class="p-1 border">Subject</th><th class="p-1 border">ID</th><th class="p-1 border">Score</th></tr>`;
+                data.slice(-5).reverse().forEach(row => {
+                    tableHtml += `<tr class="border-b"><td class="p-1 font-bold">${row.teacher}</td><td>${row.classroom}</td><td class="text-blue-300">${row.subject}</td><td>${row.student_id}</td><td class="text-center font-bold text-yellow-300">${row.score}</td></tr>`;
+                });
+                previewDiv.innerHTML = tableHtml + `</table>`;
+            };
+        }
+
+        function downloadStudentTemplate() {
+            const templateData = [{ "Namba": "S0101/0001", "Jina": "Juma Hamisi", "Darasa": "Form 1" }];
             const worksheet = XLSX.utils.json_to_sheet(templateData);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Fomati_Majina");
-            XLSX.writeFile(workbook, `Template_Majina_${currentClass}.xlsx`);
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Students_Enrollment");
+            XLSX.writeFile(workbook, "Roster_Enrollment_Template.xlsx");
         }
 
-        async function uploadStudents() {
-            if(!isOnline) return alert("Kazi hii inahitaji mtandao ili kusawazisha darasa zima na Server.");
-            const currentClass = document.getElementById('select-class').value;
+        function uploadStudentList() {
             const fileInput = document.getElementById('excel-file');
-            if (!fileInput.files[0]) return alert("Chagua faili la Excel!");
-
+            if (!fileInput.files[0]) return;
             const reader = new FileReader();
-            reader.onload = async function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
+            reader.onload = function(e) {
+                const workbook = XLSX.read(e.target.result, { type: 'binary' });
                 const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-
-                if (jsonData.length > 0) {
-                    classesDatabase[currentClass] = jsonData.map(row => ({
-                        id: String(row.Namba || row.namba).toUpperCase(),
-                        name: String(row.Jina || row.jina).toUpperCase(),
-                        gender: String(row.Jinsia || row.jinsia).toUpperCase(),
-                        marks: {}
-                    }));
-                    
-                    try {
-                        await fetch(`${FIREBASE_URL}/school_database.json`, {
-                            method: 'PUT',
-                            body: JSON.stringify(classesDatabase)
-                        });
-                        localStorage.setItem('local_school_database', JSON.stringify(classesDatabase));
-                        alert(`Majina mapya ya ${currentClass} yamehifadhiwa Cloud na kwenye Kifaa!`);
-                        fileInput.value = "";
-                        renderTable();
-                    } catch(err) { alert("Imeshindwa kupandisha majina, angalia mtandao wako."); }
-                }
+                const tx = db.transaction("students", "readwrite");
+                const store = tx.objectStore("students");
+                store.clear();
+                jsonData.forEach(student => {
+                    store.add({ Namba: student.Namba.toString().trim(), Jina: student.Jina.toString().trim(), Darasa: student.Darasa.toString().trim() });
+                });
+                tx.oncomplete = function() { alert("Enrollment registry successfully mapped!"); fileInput.value = ''; loadStudentsFromDB(); };
             };
-            reader.readAsArrayBuffer(fileInput.files[0]);
+            reader.readAsBinaryString(fileInput.files[0]);
         }
 
-        async function clearCurrentClassData() {
-            if(!isOnline) return alert("Huwezi kufuta darasa ukiwa Offline.");
-            const currentClass = document.getElementById('select-class').value;
-            if (confirm(`Futa kabisa wanafunzi wa ${currentClass} kwenye Server?`)) {
-                classesDatabase[currentClass] = [];
-                try {
-                    await fetch(`${FIREBASE_URL}/school_database.json`, {
-                        method: 'PUT',
-                        body: JSON.stringify(classesDatabase)
-                    });
-                    localStorage.setItem('local_school_database', JSON.stringify(classesDatabase));
-                    renderTable();
-                } catch(e) { alert("Imeshindwa kufuta, mtandao unasumbua."); }
+        function clearStudentRegistry() {
+            if(confirm("Purge entire structural roster list data? This cannot be undone.")) {
+                db.transaction("students", "readwrite").objectStore("students").clear().onsuccess = function() { loadStudentsFromDB(); };
             }
         }
 
         function downloadExcel() {
-            const currentClass = document.getElementById('select-class').value;
-            const currentStudents = classesDatabase[currentClass] || [];
-            if (currentStudents.length === 0) return alert("Hakuna data.");
-            
-            const examType = document.getElementById('select-exam-type').value;
-            const term = document.getElementById('select-term').value;
-            const month = document.getElementById('select-month').value;
-            const year = document.getElementById('select-year').value;
-
-            const subjectsList = ["KISW", "ENG", "MATHS", "HIST", "GEO", "CHEM", "PHYS", "BIOS", "HTM", "BS"];
-
-            const excelRows = currentStudents.map(student => {
-                let m = student.marks || {};
-                let rowObject = {
-                    "Namba": student.id,
-                    "Jina Kamili": student.name,
-                    "Jinsia": student.gender
-                };
-                
-                subjectsList.forEach(sub => {
-                    const dynamicExamKey = `${sub}_${examType}_${term}_${month}_${year}`;
-                    rowObject[sub] = m[dynamicExamKey] !== undefined ? m[dynamicExamKey] : "-";
-                });
-
-                return rowObject;
-            });
-
-            const worksheet = XLSX.utils.json_to_sheet(excelRows);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Matokeo");
-            XLSX.writeFile(workbook, `Matokeo_${currentClass}_${examType}_${term}_${month}_${year}.xlsx`);
+            db.transaction("marks", "readonly").objectStore("marks").getAll().onsuccess = function(e) {
+                const data = e.target.result; if(data.length === 0) return;
+                const worksheet = XLSX.utils.json_to_sheet(data);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Report Sheet");
+                XLSX.writeFile(workbook, "Mwanamwema_Master_Academic_Report.xlsx");
+            };
         }
 
-        function logout() { location.reload(); }
+        function clearLocalDatabase() {
+            if(confirm("Wipe all performance records logs from this terminal module?")) {
+                db.transaction("marks", "readwrite").objectStore("marks").clear().onsuccess = function() { refreshPreview(); loadStudentTable(); };
+            }
+        }
+
+        function logout() {
+            loggedInUser = null;
+            document.getElementById('main-system').classList.add('hidden');
+            document.getElementById('auth-screen').classList.remove('hidden');
+            switchAuthTab('login');
+        }
+
+        generateYears();
     </script>
 </body>
 </html>
